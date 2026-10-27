@@ -213,8 +213,9 @@ nd('c2c', {
   choices: [
     { text: '（朝那扇开着的门走过去。）', next: 'c3' },
     { text: '（站着不动，等它数完。）', next: 'c2d' },
-    /* 幻觉选项：错乱档才出现。它"省一步"，但省掉的正是你唯一能看清厕所的时间。 */
-    { text: '门后面有人在叫我的名字。', next: 'c3', when: { maxSanity: 34 },
+    /* 幻觉选项：标准档错乱 / 噩梦档恍惚才出现；故事档永不出现。
+       它"省一步"，但省掉的正是你唯一能看清厕所的时间。 */
+    { text: '门后面有人在叫我的名字。', next: 'c3', when: { hallucination: true },
       sanityHint: '……有人在叫我。', effects: { stats: { knock: 3, sanity: -6 }, flags: { heard_name: true } } }
   ]
 });

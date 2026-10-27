@@ -690,8 +690,9 @@ nd('f6', {
   ],
   choices: [
     { text: '点开线索，把规则串起来。', next: 'f7', when: { minSanity: 45 }, sanityHint: '碎片拼不起来了', effects: { clues: ['forum_trap', 'audio_trap', 'knock_rule'], codex: ['g_qiaomen'], flags: { solved_forum: true }, stats: { sanity: 10 } } },
-    /* 幻觉选项：错乱档才出现。承诺"跳过这一节"，而时间正是玩家最缺的。 */
-    { text: '我知道那条线在哪——不用想了，走。', next: 'f7', when: { maxSanity: 34 }, sanityHint: '我知道的。我知道的。', effects: { stats: { clock: 20, sanity: -5 }, flags: { guessed_it: true } } },
+    /* 幻觉选项：标准档错乱 / 噩梦档恍惚才出现；故事档永不出现。
+       承诺"跳过这一节"，而时间正是玩家最缺的。 */
+    { text: '我知道那条线在哪——不用想了，走。', next: 'f7', when: { hallucination: true }, sanityHint: '我知道的。我知道的。', effects: { stats: { clock: 20, sanity: -5 }, flags: { guessed_it: true } } },
     { text: '不看了。现在最要紧的是想办法。', next: 'f7' }
   ]
 });

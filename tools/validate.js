@@ -89,6 +89,10 @@ function checkCond(from, c) {
     });
     if (Array.isArray(c.diff) && !c.diff.length) errors.push(`[${from}] when.diff 是空数组（永远不满足）`);
   }
+  /* 幻觉选项标记：只能是 true（门槛随档位由引擎决定） */
+  if (c.hallucination != null && c.hallucination !== true) {
+    errors.push(`[${from}] when.hallucination 只能是 true，实际 ${JSON.stringify(c.hallucination)}`);
+  }
   /* 理智门槛：0–100 的整数（越界的值会静默变成"永不满足"或"永远满足"） */
   for (const k of ['minSanity', 'maxSanity']) {
     if (c[k] == null) continue;

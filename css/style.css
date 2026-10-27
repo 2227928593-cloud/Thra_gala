@@ -846,6 +846,10 @@ body.diff-story .choice:hover .num{ color:#c25850; border-color:rgba(194,88,80,.
 body[data-daze="1"] .stage{ filter:saturate(.98); }
 body[data-daze="2"] .stage{ filter:saturate(.96); }
 body[data-daze="3"] .stage{ filter:saturate(.94); }
+/* 故事档专属表现：不锁选项，只让画面"糊"一点，配合专属旁白（引擎 STORY_DAZE_LINES）。
+   模糊只作用在布景与立绘，不碰台词，避免读不清字。 */
+body[data-diff="story"][data-daze="2"] .stage{ filter:saturate(.96) blur(.2px); }
+body[data-diff="story"][data-daze="3"] .stage{ filter:saturate(.93) blur(.35px); }
 /* 边缘极轻的横向抖动（≤2px），只作用在台词区，不动镜头 */
 body[data-daze="3"] .story-text{ animation:dazeJitter 5.5s ease-in-out infinite; }
 @keyframes dazeJitter{

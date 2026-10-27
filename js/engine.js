@@ -1201,6 +1201,7 @@
 
   function renderStage(n) {
     const stage = $('#stage');
+    document.body.dataset.diff = (state && state.difficulty) || 'standard';
     const mood = n.mood !== undefined ? n.mood : lastMood;
     stage.className = 'stage' + (mood ? ' ' + mood : '');
     lastMood = mood;
@@ -1357,6 +1358,9 @@
     }
     (n.choices || []).forEach(c => {
       if (c.once && state.flags['__ch_' + n.id + '_' + c.text]) return;
+      /* 幻觉选项不是"锁着"，是"不存在"：理智没到那一步就整条不渲染，
+         否则玩家会看到一条永远点不动的假选项，等于提前剧透。 */
+      if (c.when && c.when.hallucination && !check(c.when)) return;
       list.push(c);
     });
     /* 说明行要在"没有选项就自动前进"之前渲染，否则纯观察节点上永远看不到它 */
@@ -1720,6 +1724,15 @@
     /* 设计 §8.4：新增两个门槛（g7 的"还剩几个人"、f10 的"人性还剩多少"） */
     if (cond.minSurvivors != null && (state.stats.survivors || 0) < cond.minSurvivors) return false;
     if (cond.maxCorruption != null && (state.stats.corruption || 0) > cond.maxCorruption) return false;
+    /* 幻觉选项：只在"脑子已经不可靠"时出现，且门槛随档位走（设计 §3.10）。
+       故事档永不出现——它不靠幻觉制造难度；标准档错乱（≤34）；噩梦档恍惚（≤59）。
+       它们是"出现/不出现"，不是"灰着"：渲染时会整条隐藏，见 renderChoices。 */
+    if (cond.hallucination) {
+      const diff = (state && state.difficulty) || 'standard';
+      if (diff === 'story') return false;
+      const at = diff === 'nightmare' ? 59 : 34;
+      if (sanityValue() > at) return false;
+    }
     /* 理智门槛：只锁"过得干不干净"，不锁"能不能过"（数据不变量见 tools/validate.js）。
        故事档是硬豁免——它卖的是"把这一夜看完"，理智只改文本与表现，不锁任何选项（设计 §3.10）。 */
     const storyFree = (state.difficulty || 'standard') === 'story';
@@ -1916,11 +1929,7 @@
       lastHUD.sanityBand = band.daze;
       document.body.dataset.daze = band.daze ? String(band.daze) : '';
       if (!first) {
-        const line = {
-          1: '你听见自己的呼吸，比刚才快了一点。',
-          2: '台词在你眼前重影，你花了半秒才认出一个字。',
-          3: '你开始分不清哪句话是自己想的。'
-        }[band.daze];
+        const line = (state.difficulty === 'story' ? STORY_DAZE_LINES : DAZE_LINES)[band.daze];
         if (line) toast(line, 'warn');
         if (band.daze >= 1 && window.Sound) Sound.play('heartbeat');
       }
@@ -1939,6 +1948,17 @@
     { at: 15, name: '错乱', daze: 3 },
     { at: 0,  name: '错乱', daze: 3 }   // 1–14 仍算错乱；0 才是断片，由引擎转场
   ];
+  /* 跨档时的一句"表现"。故事档是专属文案：它不锁任何选项，靠叙述变调让你知道自己不对劲。 */
+  const DAZE_LINES = {
+    1: '你听见自己的呼吸，比刚才快了一点。',
+    2: '台词在你眼前重影，你花了半秒才认出一个字。',
+    3: '你开始分不清哪句话是自己想的。'
+  };
+  const STORY_DAZE_LINES = {
+    1: '你眨了一下眼。走廊比刚才长了一点，也可能是你走慢了。',
+    2: '你听见有人在数数。数到七的时候，声音停了——你还在心里数。',
+    3: '你低头看自己的手。它比你先动了一步。'
+  };
   function sanityValue() {
     return state ? (state.stats.sanity == null ? 100 : state.stats.sanity) : 100;
   }
@@ -2335,6 +2355,7 @@
     setDifficulty, difficulty: () => runDiff(),
     batteryTier, dreadLevel, observeCost, observationVisible, observationRemaining,
     sanityBand, sanityValue, SANITY_BANDS, sanityGateFailed, scaleSanity, applyEffects,
+    DAZE_LINES, STORY_DAZE_LINES,
     lightPlan, knockDeltaFor, elapsedMin, minutesUntil, hotspotTier,
     restartNode, rollbackAfterDeath, pressCorruption, deathTarget,
     migrateSave, snapshot

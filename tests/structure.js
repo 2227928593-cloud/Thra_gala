@@ -82,7 +82,7 @@ const LINE_KEYS = new Set(['who', 'text', 'style', 'effects', 'cast', 'scene', '
 const CHOICE_KEYS = new Set(['text', 'next', 'when', 'lockedHint', 'hint', 'cls', 'effects', 'ending', 'once', 'action', 'req', 'tell']);
 const OBS_KEYS = new Set(['id', 'label', 'x', 'y', 'text', 'effects', 'free', 'light', 'risk', 'noDim']);
 const FX_KEYS = new Set(['flags', 'set', 'stats', 'clues', 'codex', 'items', 'toast', 'toastKind', 'fx', 'sfx']);
-const COND_KEYS = new Set(['flag', 'notFlag', 'clue', 'item', 'minEyes', 'minKnock', 'maxBattery', 'minBattery', 'minCorruption', 'minSurvivors', 'maxCorruption', 'minSanity', 'maxSanity', 'diff', 'allClues']);
+const COND_KEYS = new Set(['flag', 'notFlag', 'clue', 'item', 'minEyes', 'minKnock', 'maxBattery', 'minBattery', 'minCorruption', 'minSurvivors', 'maxCorruption', 'minSanity', 'maxSanity', 'diff', 'allClues', 'hallucination']);
 const unusedNodeKeys = new Map();
 for (const id of Object.keys(NODES)) {
   const n = NODES[id];

@@ -793,6 +793,38 @@ module.exports = async function runDifficulty() {
       eq(sc.nightmare.plus, 10, '噩梦恢复 ×1');
     });
 
+    await test('幻觉选项按档位出现：故事永不、标准≤34、噩梦≤59（且不是灰着）', async () => {
+      const hasHall = (g) => g.choices().some(c => /叫我的名字/.test(c.text));
+      const lockedHall = (g) => g.choices().some(c => /叫我的名字/.test(c.text) && c.locked);
+
+      const s30 = await atNode('c2c', '&diff=standard&sanity=30'); await s30.toDecision();
+      eq(hasHall(s30), true, '标准档错乱（30）应出现幻觉选项');
+      eq(lockedHall(s30), false, '幻觉选项不应以灰锁形式出现');
+
+      const s40 = await atNode('c2c', '&diff=standard&sanity=40'); await s40.toDecision();
+      eq(hasHall(s40), false, '标准档动摇（40）不应出现幻觉选项');
+
+      const n50 = await atNode('c2c', '&diff=nightmare&sanity=50'); await n50.toDecision();
+      eq(hasHall(n50), true, '噩梦档恍惚（50）应出现幻觉选项');
+
+      const n60 = await atNode('c2c', '&diff=nightmare&sanity=60'); await n60.toDecision();
+      eq(hasHall(n60), false, '噩梦档动摇（60）不应出现幻觉选项');
+
+      const st = await atNode('c2c', '&diff=story&sanity=10'); await st.toDecision();
+      eq(hasHall(st), false, '故事档永不出现幻觉选项');
+    });
+
+    await test('故事档专属表现文案：与通用跨档文案不同，且锁在旁白层', async () => {
+      /* 直接读引擎导出的两张表：同档位不能是同一句 */
+      const st = await atNode('p2', '&diff=story&sanity=50');
+      const tables = st.run('({ g: __game.DAZE_LINES, s: __game.STORY_DAZE_LINES })');
+      ok(tables && tables.g && tables.s, '两张文案表应可读');
+      [1, 2, 3].forEach(d => {
+        ok(tables.s[d] && tables.g[d], '档位 ' + d + ' 两张表都应有文案');
+        ok(tables.s[d] !== tables.g[d], '档位 ' + d + ' 故事档文案应与通用文案不同');
+      });
+    });
+
     await test('函数条件也能归因理智（f8:1 那类写法），且不误报档位', async () => {
       /* f8:1 的真实写法：噩梦档 + 理智 < 30 才锁 */
       const FN = `(s => !(s.difficulty === 'nightmare' && (s.stats.sanity == null ? 100 : s.stats.sanity) < 30))`;
