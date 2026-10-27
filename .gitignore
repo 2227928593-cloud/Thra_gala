@@ -1,0 +1,16 @@
+# 本地工具与预览产物
+.workbuddy/
+tools/_build/
+
+# 美术工作目录（交付资源在 art/characters、art/scenes、art/endings、art/ui）
+art/_samples/
+art/_final/
+art/_backup_pre2010s/
+
+# 原著全文：仅本地参考，不随仓库分发
+恐怖复苏.txt
+
+# 归档与系统文件
+*.zip
+.DS_Store
+Thumbs.db

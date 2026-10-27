@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>恐怖复苏 · 敲门</title>
+<meta name="description" content="改编自佛前献花《恐怖复苏》第一卷的互动叙事游戏：第七中学，鬼敲门。" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- ============ 启动画面 ============ -->
+<section id="boot" class="screen">
+  <div class="boot-art"><img src="art/ui/title.jpg" alt="封面：第七中学的教室，门外的黑衫老人" onerror="this.style.display='none'" /></div>
+  <div class="boot-veil"></div>
+  <div class="boot-inner">
+    <p class="boot-kicker">改编自佛前献花《恐怖复苏》第一卷</p>
+    <h1 class="boot-title"><span>恐怖复苏</span><em>敲门</em></h1>
+    <p class="boot-sub">第七中学 · 六月二十一日 · 晚自习</p>
+    <div class="boot-quote">
+      <p>鬼无法被杀死。</p>
+      <p>能对付鬼的只有鬼。</p>
+      <p>洞察鬼的规律。</p>
+    </div>
+    <nav class="boot-menu">
+      <button class="menu-item" data-act="new">开始游戏<span>新的一夜</span></button>
+      <button class="menu-item" data-act="continue" id="btn-continue">继续游戏<span id="continue-meta">没有存档</span></button>
+      <button class="menu-item" data-act="codex">档案<span>鬼物 · 规则 · 记忆</span></button>
+      <button class="menu-item" data-act="gallery">结局回廊<span id="gallery-meta">0 / 7</span></button>
+      <button class="menu-item" data-act="settings">设定<span>音量 · 文字 · 动效</span></button>
+    </nav>
+    <p class="boot-foot" id="boot-foot">建议佩戴耳机 · 全程可存档 · 含 7 个结局</p>
+  </div>
+</section>
+
+<!-- ============ 游戏舞台 ============ -->
+<section id="game" class="screen" aria-hidden="true">
+  <div class="stage" id="stage">
+
+    <div class="bg-wrap">
+      <img class="bg" id="bg-a" alt="" aria-hidden="true" />
+      <img class="bg" id="bg-b" alt="" aria-hidden="true" />
+      <div class="bg-tint" id="bg-tint"></div>
+      <div class="bg-fog" id="bg-fog"></div>
+    </div>
+
+    <div class="sprites" id="sprites"></div>
+
+    <div class="fx-grain"></div>
+    <div class="fx-scan"></div>
+    <div class="fx-vignette"></div>
+    <div class="fx-flash" id="fx-flash"></div>
+
+    <header class="hud">
+      <div class="hud-left">
+        <div class="chapter" id="hud-chapter">序章</div>
+        <div class="place" id="hud-place">大昌市 · 城东出租屋</div>
+      </div>
+      <div class="hud-right">
+        <div class="stat" id="stat-clock" title="距离凌晨五点三十还有多久">
+          <span class="k">时刻</span><span class="v" id="v-clock">21:47</span>
+        </div>
+        <div class="stat diff-stat" id="stat-diff" title="当前难易度">
+          <span class="k">难度</span><span class="v" id="v-diff">标准</span>
+        </div>
+        <div class="stat knock-stat" id="stat-knock" title="你已经听见了多少次敲门声">
+          <span class="k">敲门</span><span class="v" id="v-knock">0</span>
+        </div>
+        <div class="stat eyes-stat" id="stat-eyes" title="皮肉之下的眼睛">
+          <span class="k">鬼眼</span><span class="v" id="v-eyes">0</span>
+        </div>
+        <div class="stat battery-stat" id="stat-battery" hidden title="手机剩余电量">
+          <span class="k">电量</span><span class="v" id="v-battery">100%</span>
+        </div>
+        <div class="stat corrupt-stat" id="stat-corrupt" title="厉鬼复苏的程度">
+          <span class="k">复苏</span><span class="bar"><i id="v-corrupt"></i></span>
+        </div>
+        <button class="hud-btn" id="btn-codex" title="档案 [C]">档案</button>
+        <button class="hud-btn" id="btn-sound" title="声音 [M]">声</button>
+        <button class="hud-btn" id="btn-menu" title="菜单 [Esc]">菜单</button>
+      </div>
+    </header>
+
+    <div class="dread" id="dread" aria-hidden="true"></div>
+
+    <div class="dialogue" id="dialogue">
+      <div class="nameplate" id="nameplate"><span id="name-text">杨间</span></div>
+      <div class="textbox">
+        <p class="story-text" id="story-text"></p>
+        <span class="caret" id="caret"></span>
+      </div>
+      <div class="dialogue-foot">
+        <span class="tag" id="d-tag"></span>
+        <span class="advance-hint" id="advance-hint">空格 / 点击继续</span>
+      </div>
+    </div>
+
+    <div class="choices" id="choices" aria-live="polite"></div>
+
+    <div class="observe-bar" id="observe-bar" hidden>
+      <span class="observe-title">观察</span>
+      <span class="observe-hint" id="observe-hint">点击画面中可疑的地方</span>
+      <button class="observe-exit" id="observe-exit">退开</button>
+    </div>
+    <div class="observe-layer" id="observe-layer" hidden></div>
+    <div class="observe-card" id="observe-card" hidden>
+      <h3 id="observe-card-title"></h3>
+      <span class="observe-tier plain" id="observe-card-tier"></span>
+      <p id="observe-card-text"></p>
+      <button id="observe-card-close">记下</button>
+    </div>
+
+    <div class="toast-wrap" id="toast-wrap"></div>
+    <div class="subtitle" id="subtitle"></div>
+  </div>
+</section>
+
+<!-- ============ 弹层 ============ -->
+<div class="modal" id="modal-codex" hidden>
+  <div class="modal-panel wide">
+    <header class="modal-head">
+      <h2>档案</h2>
+      <button class="x" data-close>关闭</button>
+    </header>
+    <div class="tabs" id="codex-tabs">
+      <button data-tab="clue" class="active">线索</button>
+      <button data-tab="ghost">鬼物</button>
+      <button data-tab="person">人物</button>
+      <button data-tab="memory">记忆碎片</button>
+    </div>
+    <div class="modal-body" id="codex-body"></div>
+  </div>
+</div>
+
+<div class="modal" id="modal-gallery" hidden>
+  <div class="modal-panel wide">
+    <header class="modal-head">
+      <h2>结局回廊</h2>
+      <button class="x" data-close>关闭</button>
+    </header>
+    <div class="modal-body gallery" id="gallery-body"></div>
+  </div>
+</div>
+
+<div class="modal" id="modal-menu" hidden>
+  <div class="modal-panel">
+    <header class="modal-head">
+      <h2>暂停</h2>
+      <button class="x" data-close>关闭</button>
+    </header>
+    <div class="modal-body menu-list">
+      <button data-act="resume">继续</button>
+      <button data-act="codex">档案</button>
+      <button data-act="save">保存进度</button>
+      <button data-act="load">读取进度</button>
+      <button data-act="restart" hidden>回到本场景开头</button>
+      <button data-act="press" hidden>压住它（消耗 1 名同伴）</button>
+      <button data-act="gallery">结局回廊</button>
+      <button data-act="settings">设定</button>
+      <button data-act="title" class="danger">回到标题</button>
+    </div>
+    <p class="menu-note" id="menu-note">进度会在每次进入新场景时自动保存。</p>
+  </div>
+</div>
+
+<div class="modal" id="modal-settings" hidden>
+  <div class="modal-panel">
+    <header class="modal-head">
+      <h2>设定</h2>
+      <button class="x" data-close>关闭</button>
+    </header>
+    <div class="modal-body settings">
+      <label class="row"><span>难易度<em class="row-note">改动立刻生效，并成为下一局的默认值</em></span>
+        <select id="set-difficulty">
+          <option value="story">故事 · 代价更轻、提示更全</option>
+          <option value="standard">标准 · 设计意图</option>
+          <option value="nightmare">噩梦 · 单槽存档，死亡回滚</option>
+        </select>
+      </label>
+      <label class="row"><span>主音量</span><input type="range" id="set-volume" min="0" max="100" value="70" /></label>
+      <label class="row"><span>环境音</span><input type="range" id="set-ambience" min="0" max="100" value="60" /></label>
+      <label class="row"><span>文字速度</span><input type="range" id="set-speed" min="8" max="70" value="32" /></label>
+      <label class="row switch"><span>画面抖动与闪烁</span><input type="checkbox" id="set-fx" checked /></label>
+      <label class="row switch"><span>减少动效</span><input type="checkbox" id="set-reduced" /></label>
+      <label class="row switch"><span>总是显示可观察提示</span><input type="checkbox" id="set-hotspots" /></label>
+      <button class="ghost-btn" id="btn-reset" style="margin-top:14px">清除全部进度与解锁</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal-end" hidden>
+  <div class="modal-panel end">
+    <img class="end-art" id="end-art" alt="">
+    <p class="end-kicker" id="end-kicker">结局</p>
+    <h2 class="end-title" id="end-title"></h2>
+    <p class="end-body" id="end-body"></p>
+    <p class="end-stat" id="end-stat"></p>
+    <div class="end-actions">
+      <button data-act="again">再来一夜</button>
+      <button data-act="gallery">结局回廊</button>
+      <button data-act="title">回到标题</button>
+    </div>
+  </div>
+</div>
+
+<div class="confirm" id="confirm" hidden>
+  <div class="confirm-box">
+    <p id="confirm-text"></p>
+    <div class="confirm-actions">
+      <button id="confirm-yes">确定</button>
+      <button id="confirm-no">取消</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/audio.js"></script>
+<script src="js/data.js"></script>
+<script src="js/story2.js"></script>
+<script src="js/story3.js"></script>
+<script src="js/story4.js"></script>
+<script src="js/engine.js"></script>
+</body>
+</html>
